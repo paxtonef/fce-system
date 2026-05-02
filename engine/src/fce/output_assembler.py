@@ -1,102 +1,75 @@
-"""OutputAssembler module for FCE."""
+"""OutputAssembler — assembles final output conforming to SPEC-FCE-001."""
+
+from datetime import datetime, timezone
+from typing import Any, Dict, List
 
 
 class OutputAssembler:
-    """Assembles final output from pack data and constraints."""
+    """Assembles final output with full schema validation."""
 
-    def check_mutual_exclusion(self, blocked_actions: list[str], allowed_actions: list[str]) -> bool:
+    def assemble(self, raw_output: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Vérifie que blocked_actions et allowed_actions sont disjoints.
-        Retourne True si disjoints.
-        Lève ValueError avec message explicite si intersection non vide.
+        raw_output must contain all required keys.
+        Returns validated and enriched output dict.
         """
-        blocked_set = set(blocked_actions)
-        allowed_set = set(allowed_actions)
-        intersection = blocked_set & allowed_set
+        required_keys = [
+            "state",
+            "confidence_score",
+            "allowed_actions",
+            "blocked_actions",
+            "discouraged_actions",
+            "priority_actions",
+            "applied_constraints",
+            "reasoning",
+            "flags",
+        ]
 
+        for key in required_keys:
+            if key not in raw_output:
+                raise ValueError(f"Missing required output key: '{key}'")
+
+        for list_key in ("allowed_actions", "blocked_actions", "discouraged_actions",
+                         "priority_actions", "applied_constraints", "flags"):
+            if not isinstance(raw_output[list_key], list):
+                raw_output[list_key] = list(raw_output[list_key])
+
+        if not isinstance(raw_output["reasoning"], str):
+            raw_output["reasoning"] = str(raw_output["reasoning"])
+
+        self.check_mutual_exclusion(
+            raw_output["blocked_actions"],
+            raw_output["allowed_actions"],
+        )
+
+        self.assert_completeness(raw_output)
+
+        raw_output["metadata"] = {
+            "domain": raw_output.get("_domain", "unknown"),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+        raw_output.pop("_domain", None)
+        raw_output.pop("_confidence_score", None)
+
+        return raw_output
+
+    def check_mutual_exclusion(
+        self, blocked_actions: List[str], allowed_actions: List[str]
+    ) -> bool:
+        intersection = set(blocked_actions) & set(allowed_actions)
         if intersection:
             raise ValueError(
                 f"Mutual exclusion violated: actions {sorted(intersection)} "
                 f"are in both blocked_actions and allowed_actions"
             )
-
         return True
 
-    def assert_completeness(self, output: dict) -> None:
-        """
-        Vérifie que output['applied_constraints'] et output['reasoning']
-        sont non-None et non-vides.
-        Lève ValueError avec message explicite sinon.
-        """
-        applied_constraints = output.get("applied_constraints")
+    def assert_completeness(self, output: Dict[str, Any]) -> None:
+        applied = output.get("applied_constraints")
         reasoning = output.get("reasoning")
 
-        if applied_constraints is None:
-            raise ValueError("output['applied_constraints'] is None")
+        if not applied:
+            raise ValueError("output['applied_constraints'] is empty or None")
 
-        if len(applied_constraints) == 0:
-            raise ValueError("output['applied_constraints'] is empty")
-
-        if reasoning is None:
-            raise ValueError("output['reasoning'] is None")
-
-        if len(reasoning) == 0:
-            raise ValueError("output['reasoning'] is empty")
-
-    def assemble(self, pack_data: dict, constraints: list[dict], score: float) -> dict:
-        """
-        Retourne obligatoirement :
-        {
-            "applied_constraints": [...],
-            "reasoning": [...],
-            "blocked_actions": [...],
-            "allowed_actions": [...],
-            "confidence_score": float
-        }
-        Appelle check_mutual_exclusion() avant de retourner.
-        """
-        actions = pack_data.get("actions", [])
-
-        # Classification des actions en blocked/allowed
-        blocked_actions = []
-        allowed_actions = []
-
-        for action in actions:
-            action_id = action.get("id", "unknown")
-            risk_level = action.get("risk_level", "medium")
-
-            # Actions à haut risque sont bloquées si score < 0.7
-            if risk_level == "high" and score < 0.7:
-                blocked_actions.append(action_id)
-            elif risk_level == "critical":
-                blocked_actions.append(action_id)
-            else:
-                allowed_actions.append(action_id)
-
-        # Garantir disjointure par filtrage
-        blocked_set = set(blocked_actions)
-        allowed_actions = [a for a in allowed_actions if a not in blocked_set]
-
-        # Construction du reasoning
-        reasoning = []
-        for constraint in constraints:
-            reasoning.append({
-                "constraint_id": constraint.get("id"),
-                "reason": f"Constraint {constraint.get('id')} activated with confidence {score:.4f}",
-            })
-
-        # Vérifier exclusion mutuelle avant retour
-        self.check_mutual_exclusion(blocked_actions, allowed_actions)
-
-        output = {
-            "applied_constraints": constraints,
-            "reasoning": reasoning if reasoning else [{"reason": "No constraints to apply"}],
-            "blocked_actions": blocked_actions,
-            "allowed_actions": allowed_actions,
-            "confidence_score": float(score),
-        }
-
-        # Vérifier complétude avant retour
-        self.assert_completeness(output)
-
-        return output
+        if not reasoning:
+            raise ValueError("output['reasoning'] is empty or None")

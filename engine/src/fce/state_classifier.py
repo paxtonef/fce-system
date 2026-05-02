@@ -1,84 +1,125 @@
-"""StateClassifier module for FCE."""
+"""StateClassifier — classifies domain state and returns confidence."""
+
+from typing import Any, Dict
 
 
 class StateClassifier:
     """Classifies pack state and returns deterministic confidence score."""
 
     def compute_confidence(self, raw_score: float) -> float:
-        """
-        Clamp raw_score dans [0.0, 1.0].
-        raw_score < 0.0 → 0.0
-        raw_score > 1.0 → 1.0
-        Sinon → raw_score tel quel.
-        """
-        return max(0.0, min(1.0, raw_score))
+        """Clamp raw_score dans [0.0, 1.0]."""
+        return max(0.0, min(1.0, float(raw_score)))
 
-    def score(self, pack_data: dict, context: dict | None = None) -> float:
-        """
-        Retourne un confidence_score dans [0.0, 1.0].
-        Déterministe : mêmes entrées + même pack = même sortie.
-        """
-        context = context or {}
+    def _stable_hash(self, s: str) -> int:
+        """Deterministic hash — immune to PYTHONHASHSEED."""
+        h = 0
+        for c in s:
+            h = (h * 31 + ord(c)) & 0xFFFFFFFF
+        return h
 
+    def classify(
+        self,
+        structured_metrics: Dict[str, Any],
+        user_declared: Dict[str, Any],
+        optional_external: Dict[str, Any],
+        pack: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """
+        Returns:
+            {
+                "state": "unstable" | "stable" | "expansion",
+                "confidence_score": float,
+                "flags": list[str],
+            }
+        """
+        score = self._compute_score(structured_metrics, user_declared, optional_external, pack)
+
+        if score < 0.35:
+            state = "unstable"
+        elif score < 0.75:
+            state = "stable"
+        else:
+            state = "expansion"
+
+        flags = []
+        if state == "unstable":
+            flags.append("low_confidence")
+        if not pack.get("constraints"):
+            flags.append("empty_constraints")
+
+        return {
+            "state": state,
+            "confidence_score": self.compute_confidence(score),
+            "flags": flags,
+        }
+
+    def _compute_score(
+        self,
+        structured_metrics: Dict[str, Any],
+        user_declared: Dict[str, Any],
+        optional_external: Dict[str, Any],
+        pack: Dict[str, Any],
+    ) -> float:
+        """Deterministic weighted score computation."""
         score_components = []
 
-        # 1. Score basé sur le nombre de contraintes (normalisé)
-        constraints = pack_data.get("constraints", [])
+        constraints = pack.get("constraints", [])
         constraint_score = min(len(constraints) / 10.0, 0.3)
         score_components.append(("constraints", constraint_score))
 
-        # 2. Score basé sur le nombre d'actions (normalisé)
-        actions = pack_data.get("actions", [])
+        actions = pack.get("actions", [])
         action_score = min(len(actions) / 10.0, 0.3)
         score_components.append(("actions", action_score))
 
-        # 3. Score basé sur le contexte (déterministe)
+        context = {**structured_metrics, **user_declared, **optional_external}
         context_score = self._compute_context_score(context)
         score_components.append(("context", context_score))
 
-        # 4. Score basé sur le domaine (valeur fixe par domaine)
-        domain = pack_data.get("domain", "")
+        domain = pack.get("domain", "")
         domain_score = self._compute_domain_score(domain)
         score_components.append(("domain", domain_score))
 
-        # Calcul final : somme pondérée déterministe
+        weights = {
+            "constraints": 0.3,
+            "actions": 0.2,
+            "context": 0.2,
+            "domain": 0.3,
+        }
+
         total_weight = 0.0
         weighted_sum = 0.0
-
         for name, value in score_components:
-            weight = self._get_weight(name)
-            weighted_sum += value * weight
-            total_weight += weight
+            w = weights.get(name, 0.1)
+            weighted_sum += value * w
+            total_weight += w
 
         if total_weight == 0:
             return 0.5
 
-        final_score = weighted_sum / total_weight
+        return weighted_sum / total_weight
 
-        # AC-004 — déléguer à compute_confidence()
-        return self.compute_confidence(final_score)
-
-    def _compute_context_score(self, context: dict) -> float:
-        """Calcule un score de contexte de manière déterministe."""
+    def _compute_context_score(self, context: Dict[str, Any]) -> float:
+        """Deterministic context scoring — no hash() randomization."""
         if not context:
             return 0.0
 
         key_hash_sum = 0
         for key in sorted(context.keys()):
             value = context[key]
+            key_hash = self._stable_hash(key)
             if isinstance(value, (int, float)):
-                key_hash_sum += hash(key) + int(value * 1000)
+                key_hash_sum += key_hash + int(value * 1000)
             elif isinstance(value, str):
-                key_hash_sum += hash(key) + sum(ord(c) for c in value)
+                key_hash_sum += key_hash + sum(ord(c) for c in value)
             elif isinstance(value, bool):
-                key_hash_sum += hash(key) + (1 if value else 0)
+                key_hash_sum += key_hash + (1 if value else 0)
             else:
-                key_hash_sum += hash(key)
+                key_hash_sum += key_hash
 
         return (abs(key_hash_sum) % 1000) / 1000.0 * 0.2
 
     def _compute_domain_score(self, domain: str) -> float:
-        """Retourne un score fixe par domaine (déterministe)."""
+        """Fixed baseline score per domain."""
         domain_scores = {
             "finance": 0.8,
             "health": 0.75,
@@ -86,13 +127,3 @@ class StateClassifier:
             "test": 0.5,
         }
         return domain_scores.get(domain.lower(), 0.5)
-
-    def _get_weight(self, component_name: str) -> float:
-        """Retourne le poids pour un composant donné (déterministe)."""
-        weights = {
-            "constraints": 0.3,
-            "actions": 0.2,
-            "context": 0.2,
-            "domain": 0.3,
-        }
-        return weights.get(component_name, 0.1)

@@ -1,19 +1,15 @@
-"""PackValidator module for FCE."""
+"""PackValidator — validates constraint packs."""
+
 import datetime
+from typing import Any, Dict
 
 
 class PackValidator:
-    """Validates pack data."""
+    """Validates pack data and returns structured result."""
 
-    def validate(self, pack_data: dict) -> dict:
-        """
-        Champs obligatoires : pack_id (str), domain (str),
-                              constraints (list), actions (list)
-        Raise ValueError avec le nom du champ manquant si invalide.
-        Retourne pack_data enrichi (+ validated_at) si valide.
-        """
+    def validate(self, pack_data: Any) -> Dict[str, Any]:
         if not isinstance(pack_data, dict):
-            raise ValueError("pack_data must be a dict")
+            return {"valid": False, "message": "pack_data must be a dict", "field": None}
 
         required_fields = {
             "pack_id": str,
@@ -24,15 +20,13 @@ class PackValidator:
 
         for field, expected_type in required_fields.items():
             if field not in pack_data:
-                raise ValueError(f"Missing required field: '{field}'")
+                return {"valid": False, "message": f"Missing required field: '{field}'", "field": field}
             if not isinstance(pack_data[field], expected_type):
-                raise ValueError(
-                    f"Field '{field}' must be of type {expected_type.__name__}"
-                )
+                return {"valid": False, "message": f"Field '{field}' must be of type {expected_type.__name__}", "field": field}
 
         validated = dict(pack_data)
         validated["_validated"] = True
         validated["_validation_version"] = "1.0"
-        validated["validated_at"] = datetime.datetime.utcnow().isoformat() + "Z"
+        validated["validated_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-        return validated
+        return {"valid": True, "data": validated}

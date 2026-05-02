@@ -1,0 +1,17 @@
+pack_id: finance_v1
+domain: finance
+constraints:
+  - id: C001
+    condition: debt_ratio > 0.5
+    action: block
+  - id: C002
+    condition: income < 2000
+    action: block
+actions:
+  - id: A001
+    risk_level: high
+  - id: A002
+    risk_level: low
+    priority: true
+  - id: A003
+    risk_level: medium

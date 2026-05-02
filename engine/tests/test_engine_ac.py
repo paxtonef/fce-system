@@ -158,3 +158,32 @@ def test_ac012_output_schema_completeness(engine, valid_input):
         assert field in result, f"Missing field: {field}"
     assert "domain" in result["metadata"]
     assert "timestamp" in result["metadata"]
+
+
+def test_ac013_hard_constraint_in_unstable_state(engine, monkeypatch):
+    from fce import builtin_pack_registry as reg_mod
+    from fce import state_classifier as sc_mod
+
+    def fake_load(self, domain):
+        return {
+            'pack_id': f'{domain}_test',
+            'domain': domain,
+            'constraints': [{'id': 'C001', 'condition': 'true', 'action': 'block', 'hard': True}],
+            'actions': [{'id': 'A001', 'risk_level': 'low'}],
+        }
+
+    monkeypatch.setattr(reg_mod.BuiltinPackRegistry, 'load', fake_load)
+    monkeypatch.setattr(
+        sc_mod.StateClassifier,
+        'classify',
+        lambda *a, **k: {'state': 'unstable', 'confidence_score': 0.2, 'flags': []},
+    )
+
+    input_data = {
+        'domain': 'finance_v1',
+        'structured_metrics': {},
+        'user_declared': {},
+    }
+    result = engine.evaluate(input_data)
+    assert result['error']['type'] == 'domain_hard_constraint_triggered'
+    assert result['error']['field'] == 'constraints'

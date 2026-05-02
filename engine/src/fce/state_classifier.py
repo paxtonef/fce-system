@@ -1,17 +1,17 @@
-"""StateClassifier — classifies domain state and returns confidence."""
+"""StateClassifier -- classifies domain state with pack-driven thresholds."""
 
 from typing import Any, Dict
 
 
 class StateClassifier:
-    """Classifies pack state and returns deterministic confidence score."""
+    """Classifies pack state with deterministic confidence and pack-driven thresholds."""
 
     def compute_confidence(self, raw_score: float) -> float:
         """Clamp raw_score dans [0.0, 1.0]."""
         return max(0.0, min(1.0, float(raw_score)))
 
     def _stable_hash(self, s: str) -> int:
-        """Deterministic hash — immune to PYTHONHASHSEED."""
+        """Deterministic hash -- immune to PYTHONHASHSEED."""
         h = 0
         for c in s:
             h = (h * 31 + ord(c)) & 0xFFFFFFFF
@@ -34,18 +34,32 @@ class StateClassifier:
         """
         score = self._compute_score(structured_metrics, user_declared, optional_external, pack)
 
-        if score < 0.35:
+        # Pack-driven thresholds (SPEC-FCE-001)
+        thresholds = pack.get("thresholds", {})
+        unstable_max = thresholds.get("unstable_max", 0.35)
+        stable_max = thresholds.get("stable_max", 0.75)
+
+        if score < unstable_max:
             state = "unstable"
-        elif score < 0.75:
+        elif score < stable_max:
             state = "stable"
         else:
             state = "expansion"
 
         flags = []
         if state == "unstable":
-            flags.append("low_confidence")
+            flags.append("LOW_CONFIDENCE")
         if not pack.get("constraints"):
-            flags.append("empty_constraints")
+            flags.append("EMPTY_CONSTRAINTS")
+
+        # DATA_GAP detection
+        if not structured_metrics or not user_declared:
+            flags.append("DATA_GAP")
+
+        # UNCERTAIN zone: confidence between unstable_max and (unstable_max + 0.15)
+        uncertain_threshold = unstable_max + 0.15
+        if unstable_max <= score < uncertain_threshold:
+            flags.append("UNCERTAIN")
 
         return {
             "state": state,
@@ -99,7 +113,7 @@ class StateClassifier:
         return weighted_sum / total_weight
 
     def _compute_context_score(self, context: Dict[str, Any]) -> float:
-        """Deterministic context scoring — no hash() randomization."""
+        """Deterministic context scoring -- no hash() randomization."""
         if not context:
             return 0.0
 

@@ -104,6 +104,14 @@ class Engine:
             pack=pack,
         )
 
+        if 'HARD_CONSTRAINT_TRIGGERED' in constraint_result.get('flags', []):
+            if state == 'unstable':
+                return self._error(
+                    'domain_hard_constraint_triggered',
+                    'Hard constraint activated in unstable state -- execution halted',
+                    'constraints',
+                )
+
         raw_output = {
             "state": state,
             "confidence_score": float(confidence_score),

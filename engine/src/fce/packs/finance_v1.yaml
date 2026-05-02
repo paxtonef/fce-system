@@ -1,9 +1,13 @@
 pack_id: finance_v1
 domain: finance
+thresholds:
+  unstable_max: 0.35
+  stable_max: 0.75
 constraints:
   - id: C001
     condition: debt_ratio > 0.5
     action: block
+    hard: true
   - id: C002
     condition: income < 2000
     action: block

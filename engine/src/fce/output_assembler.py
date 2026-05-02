@@ -45,7 +45,7 @@ class OutputAssembler:
 
         raw_output["metadata"] = {
             "domain": raw_output.get("_domain", "unknown"),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         }
 
         raw_output.pop("_domain", None)

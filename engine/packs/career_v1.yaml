@@ -1,0 +1,16 @@
+pack_id: "career_v1"
+domain: "career"
+constraints:
+  - id: "C001"
+    condition: "years_experience < 2"
+    action: "review"
+  - id: "C002"
+    condition: "skill_match < 0.5"
+    action: "block"
+actions:
+  - id: "A001"
+    name: "promote"
+    risk_level: "high"
+  - id: "A002"
+    name: "assign_mentor"
+    risk_level: "low"

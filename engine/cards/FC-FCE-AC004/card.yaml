@@ -1,0 +1,10 @@
+card_id: FC-FCE-AC004
+bundle_id: SPEC-FCE-001
+type: backend
+title: Garantir que le score de confiance est toujours un nombre entre 0 et 1
+priority: P0
+acceptance_criteria: [AC-004]
+tests: [T-004]
+files:
+  - src/fce/state_classifier.py
+  - tests/unit/test_ac_004.py

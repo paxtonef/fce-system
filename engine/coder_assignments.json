@@ -1,0 +1,16 @@
+{
+  "spec_id": "SPEC-FCE-001",
+  "repo_url": "https://github.com/paxtonef/spec-fce-001-cards",
+  "generated_at": "2026-04-30T10:38:28Z",
+  "note": "Card 1 = greenfield. Cards 2-8 = projet existant.",
+  "assignments": [
+    {"card_id": "FC-FCE-AC001", "type": "greenfield", "card_url": "https://github.com/paxtonef/spec-fce-001-cards/tree/main/cards/FC-FCE-AC001", "result_slot": "results/FC-FCE-AC001/work_result.json", "status": "pending"},
+    {"card_id": "FC-FCE-AC002", "type": "existing", "card_url": "https://github.com/paxtonef/spec-fce-001-cards/tree/main/cards/FC-FCE-AC002", "result_slot": "results/FC-FCE-AC002/work_result.json", "status": "pending"},
+    {"card_id": "FC-FCE-AC003", "type": "existing", "card_url": "https://github.com/paxtonef/spec-fce-001-cards/tree/main/cards/FC-FCE-AC003", "result_slot": "results/FC-FCE-AC003/work_result.json", "status": "pending"},
+    {"card_id": "FC-FCE-AC004", "type": "existing", "card_url": "https://github.com/paxtonef/spec-fce-001-cards/tree/main/cards/FC-FCE-AC004", "result_slot": "results/FC-FCE-AC004/work_result.json", "status": "pending"},
+    {"card_id": "FC-FCE-AC005", "type": "existing", "card_url": "https://github.com/paxtonef/spec-fce-001-cards/tree/main/cards/FC-FCE-AC005", "result_slot": "results/FC-FCE-AC005/work_result.json", "status": "pending"},
+    {"card_id": "FC-FCE-AC006", "type": "existing", "card_url": "https://github.com/paxtonef/spec-fce-001-cards/tree/main/cards/FC-FCE-AC006", "result_slot": "results/FC-FCE-AC006/work_result.json", "status": "pending"},
+    {"card_id": "FC-FCE-AC007", "type": "existing", "card_url": "https://github.com/paxtonef/spec-fce-001-cards/tree/main/cards/FC-FCE-AC007", "result_slot": "results/FC-FCE-AC007/work_result.json", "status": "pending"},
+    {"card_id": "FC-FCE-AC008", "type": "existing", "card_url": "https://github.com/paxtonef/spec-fce-001-cards/tree/main/cards/FC-FCE-AC008", "result_slot": "results/FC-FCE-AC008/work_result.json", "status": "pending"}
+  ]
+}

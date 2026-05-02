@@ -1,0 +1,49 @@
+REFACTOR — Tentative 1 — FC-FCE-AC004
+Oracle verdict : PARTIAL_FULFILLMENT
+
+Le projet FCE existe. Ne recrée pas la structure.
+Fichier cible : src/fce/state_classifier.py
+
+[VIOLATION DÉTECTÉE]
+compute_confidence() est absente en tant que méthode publique séparée.
+Le clamp existe dans score() mais n'est pas exposé comme méthode standalone.
+
+[CORRECTION REQUISE]
+Ajoute cette méthode dans StateClassifier :
+
+```python
+def compute_confidence(self, raw_score: float) -> float:
+    """
+    Clamp raw_score dans [0.0, 1.0].
+    raw_score < 0.0 → 0.0
+    raw_score > 1.0 → 1.0
+    Sinon → raw_score tel quel.
+    """
+    return max(0.0, min(1.0, raw_score))
+```
+
+Et modifie score() pour appeler compute_confidence() :
+```python
+final_score = weighted_sum / total_weight if total_weight > 0 else 0.5
+return self.compute_confidence(final_score)
+```
+
+[NE PAS MODIFIER]
+- La logique de score() existante
+- Les autres modules
+
+[QUAND C'EST FAIT]
+Place work_result.json ici : results/FC-FCE-AC004/work_result.json
+```json
+{
+  "card_id": "FC-FCE-AC004",
+  "status": "PASS",
+  "files_changed": ["src/fce/state_classifier.py"],
+  "test_results": {"T-004": "pass"},
+  "confidence": 0.95,
+  "notes": "compute_confidence() ajoutée, score() refactorisé pour l'appeler"
+}
+```
+git add results/FC-FCE-AC004/work_result.json
+git commit -m "refactor: FC-FCE-AC004 compute_confidence added"
+git push

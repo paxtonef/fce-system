@@ -1,0 +1,8 @@
+{
+  "card_id": "FC-FCE-AC002",
+  "status": "PASS",
+  "files_changed": ["src/fce/output_assembler.py", "tests/unit/test_ac_002.py"],
+  "test_results": {"T-002": "pass"},
+  "confidence": 0.95,
+  "notes": ""
+}

@@ -1,0 +1,10 @@
+card_id: FC-FCE-AC006
+bundle_id: SPEC-FCE-001
+type: backend
+title: Garantir qu un pack invalide est rejete avant toute execution
+priority: P0
+acceptance_criteria: [AC-006]
+tests: [T-006]
+files:
+  - src/fce/pack_validator.py
+  - tests/unit/test_ac_006.py

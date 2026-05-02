@@ -1,0 +1,10 @@
+card_id: FC-FCE-AC005
+bundle_id: SPEC-FCE-001
+type: backend
+title: Garantir que les trois packs integres se chargent sans erreur
+priority: P0
+acceptance_criteria: [AC-005]
+tests: [T-005]
+files:
+  - src/fce/registry.py
+  - tests/unit/test_ac_005.py

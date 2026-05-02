@@ -1,0 +1,10 @@
+pack_id: "test_pack_v1"
+domain: "finance"
+constraints:
+  - id: "C001"
+    condition: "amount > 1000"
+    action: "block"
+actions:
+  - id: "A001"
+    name: "transfer"
+    risk_level: "high"

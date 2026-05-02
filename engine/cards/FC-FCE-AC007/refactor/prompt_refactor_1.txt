@@ -1,0 +1,46 @@
+REFACTOR — Tentative 1 — FC-FCE-AC007
+Oracle verdict : PARTIAL_FULFILLMENT
+
+Le projet FCE existe. Ne recrée pas la structure.
+Fichier cible : src/fce/engine.py
+
+[VIOLATION DÉTECTÉE]
+evaluate() ne vérifie pas si pack_id est None ou vide avant d'appeler registry.get().
+La guard clause manquante cause une erreur non conforme au contrat.
+
+[CORRECTION REQUISE]
+Ajoute ces deux lignes au début de evaluate() :
+
+```python
+def evaluate(self, pack_id: str, context: dict | None = None) -> dict:
+    # Guard clause — contrat AC-007
+    if not pack_id:
+        raise ValueError("Missing required input: pack_id")
+
+    # Pipeline existant — ne pas modifier
+    pack = self.registry.get(pack_id)
+    validated = self.validator.validate(pack)
+    score = self.classifier.score(validated, context)
+    constraints = self.activator.activate(validated, score)
+    return self.assembler.assemble(validated, constraints, score)
+```
+
+[NE PAS MODIFIER]
+- Le reste du pipeline
+- Les autres modules
+
+[QUAND C'EST FAIT]
+Place work_result.json ici : results/FC-FCE-AC007/work_result.json
+```json
+{
+  "card_id": "FC-FCE-AC007",
+  "status": "PASS",
+  "files_changed": ["src/fce/engine.py"],
+  "test_results": {"T-007": "pass"},
+  "confidence": 0.95,
+  "notes": "Guard clause pack_id ajoutée en début de evaluate()"
+}
+```
+git add results/FC-FCE-AC007/work_result.json
+git commit -m "refactor: FC-FCE-AC007 pack_id guard clause"
+git push

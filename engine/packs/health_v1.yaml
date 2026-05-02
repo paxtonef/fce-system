@@ -1,0 +1,16 @@
+pack_id: "health_v1"
+domain: "health"
+constraints:
+  - id: "C001"
+    condition: "bmi > 30"
+    action: "review"
+  - id: "C002"
+    condition: "age > 65"
+    action: "caution"
+actions:
+  - id: "A001"
+    name: "recommend_exercise"
+    risk_level: "low"
+  - id: "A002"
+    name: "prescription"
+    risk_level: "high"

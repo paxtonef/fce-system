@@ -1,0 +1,10 @@
+card_id: FC-FCE-AC003
+bundle_id: SPEC-FCE-001
+type: backend
+title: Garantir que la sortie contient toujours les contraintes appliquees et le raisonnement
+priority: P0
+acceptance_criteria: [AC-003]
+tests: [T-003]
+files:
+  - src/fce/output_assembler.py
+  - tests/unit/test_ac_003.py

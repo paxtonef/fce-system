@@ -1,0 +1,8 @@
+{
+  "card_id": "FC-FCE-AC008",
+  "status": "PASS",
+  "files_changed": ["src/fce/registry.py"],
+  "test_results": {"T-008": "pass"},
+  "confidence": 0.95,
+  "notes": "lookup() implémenté, get() et load() délèguent à lookup(), ValueError conforme"
+}

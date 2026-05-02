@@ -1,0 +1,10 @@
+card_id: FC-FCE-AC008
+bundle_id: SPEC-FCE-001
+type: backend
+title: Garantir qu un domaine inconnu retourne une erreur claire
+priority: P0
+acceptance_criteria: [AC-008]
+tests: [T-008]
+files:
+  - src/fce/registry.py
+  - tests/unit/test_ac_008.py

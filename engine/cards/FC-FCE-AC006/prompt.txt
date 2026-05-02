@@ -1,0 +1,53 @@
+Tu es un AI coder. Tu as une seule tâche à implémenter.
+Le projet FCE existe déjà — ne recrée pas la structure.
+
+[CONTEXTE PROJET]
+Projet : Freedom Constraint Engine (FCE) — SPEC-FCE-001
+Langage : Python 3.11+
+Le projet est déjà structuré. Lis shared/blueprint.md et shared/interfaces.py.
+
+[TA TÂCHE — AC-006]
+Critère : "Garantir qu'un pack invalide est rejeté avant toute exécution"
+Fichier cible : src/fce/pack_validator.py
+Symbole : PackValidator.validate
+
+Interface exacte :
+```python
+class PackValidator:
+    def validate(self, pack_data: dict) -> dict:
+        """
+        Champs obligatoires : pack_id, domain, constraints (list), actions (list)
+        Raise ValueError avec le nom du champ manquant si invalide.
+        Retourne pack_data enrichi (+ validated_at) si valide.
+        Le moteur NE doit PAS s'exécuter si cette méthode lève une exception.
+        """
+        pass
+```
+
+Tu dois faire passer : T-006
+
+[TESTS À IMPLÉMENTER]
+Fichier : tests/unit/test_ac_006.py
+pack invalide (sans 'constraints') → ValueError avec nom du champ
+engine.evaluate() ne s'exécute pas si validate() échoue
+
+[RÈGLES]
+- Ne modifie que src/fce/pack_validator.py et son test
+
+[QUAND C'EST FAIT]
+1. Crée work_result.json :
+{
+  "card_id": "FC-FCE-AC006",
+  "status": "PASS",
+  "files_changed": ["src/fce/pack_validator.py", "tests/unit/test_ac_006.py"],
+  "test_results": {"T-006": "pass"},
+  "confidence": 0.95,
+  "notes": ""
+}
+
+2. Place-le ici : results/FC-FCE-AC006/work_result.json
+
+3. Push :
+   git add results/FC-FCE-AC006/work_result.json
+   git commit -m "result: FC-FCE-AC006 PASS"
+   git push

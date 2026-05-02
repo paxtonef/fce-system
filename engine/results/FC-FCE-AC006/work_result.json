@@ -1,0 +1,8 @@
+{
+  "card_id": "FC-FCE-AC006",
+  "status": "PASS",
+  "files_changed": ["src/fce/pack_validator.py"],
+  "test_results": {"T-006": "pass"},
+  "confidence": 0.95,
+  "notes": "validate() complété avec vérification domain, constraints, actions"
+}

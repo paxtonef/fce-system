@@ -1,0 +1,65 @@
+REFACTOR — Tentative 1 — FC-FCE-AC006
+Oracle verdict : PARTIAL_FULFILLMENT
+
+Le projet FCE existe. Ne recrée pas la structure.
+Fichier cible : src/fce/pack_validator.py
+
+[VIOLATION DÉTECTÉE]
+validate() vérifie uniquement pack_id.
+Les champs domain (str), constraints (list), actions (list) ne sont pas vérifiés.
+
+[CORRECTION REQUISE]
+Remplace validate() par cette version complète :
+
+```python
+def validate(self, pack_data: dict) -> dict:
+    """
+    Champs obligatoires : pack_id (str), domain (str),
+                          constraints (list), actions (list)
+    Raise ValueError avec le nom du champ manquant si invalide.
+    Retourne pack_data enrichi (+ validated_at) si valide.
+    """
+    import datetime
+
+    if not isinstance(pack_data, dict):
+        raise ValueError("pack_data must be a dict")
+
+    required_fields = {
+        "pack_id": str,
+        "domain": str,
+        "constraints": list,
+        "actions": list,
+    }
+
+    for field, expected_type in required_fields.items():
+        if field not in pack_data:
+            raise ValueError(f"Missing required field: '{field}'")
+        if not isinstance(pack_data[field], expected_type):
+            raise ValueError(f"Field '{field}' must be of type {expected_type.__name__}")
+
+    validated = dict(pack_data)
+    validated["_validated"] = True
+    validated["_validation_version"] = "1.0"
+    validated["validated_at"] = datetime.datetime.utcnow().isoformat() + "Z"
+
+    return validated
+```
+
+[NE PAS MODIFIER]
+- Les autres modules
+
+[QUAND C'EST FAIT]
+Place work_result.json ici : results/FC-FCE-AC006/work_result.json
+```json
+{
+  "card_id": "FC-FCE-AC006",
+  "status": "PASS",
+  "files_changed": ["src/fce/pack_validator.py"],
+  "test_results": {"T-006": "pass"},
+  "confidence": 0.95,
+  "notes": "validate() complété avec vérification domain, constraints, actions"
+}
+```
+git add results/FC-FCE-AC006/work_result.json
+git commit -m "refactor: FC-FCE-AC006 full field validation"
+git push

@@ -1,0 +1,16 @@
+pack_id: "finance_v1"
+domain: "finance"
+constraints:
+  - id: "C001"
+    condition: "amount > 10000"
+    action: "block"
+  - id: "C002"
+    condition: "risk_score > 0.8"
+    action: "review"
+actions:
+  - id: "A001"
+    name: "transfer"
+    risk_level: "high"
+  - id: "A002"
+    name: "withdraw"
+    risk_level: "medium"

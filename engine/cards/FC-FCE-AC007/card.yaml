@@ -1,0 +1,10 @@
+card_id: FC-FCE-AC007
+bundle_id: SPEC-FCE-001
+type: backend
+title: Garantir qu une entree manquante retourne une erreur claire
+priority: P0
+acceptance_criteria: [AC-007]
+tests: [T-007]
+files:
+  - src/fce/engine.py
+  - tests/unit/test_ac_007.py

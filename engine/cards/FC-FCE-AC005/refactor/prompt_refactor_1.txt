@@ -1,0 +1,42 @@
+REFACTOR — Tentative 1 — FC-FCE-AC005
+Oracle verdict : PARTIAL_FULFILLMENT
+
+Le projet FCE existe. Ne recrée pas la structure.
+Fichier cible : src/fce/registry.py
+
+[VIOLATION DÉTECTÉE]
+load() est absente — seule get() est implémentée.
+Le contrat ACS exige load() comme méthode publique séparée.
+
+[CORRECTION REQUISE]
+Ajoute cette méthode dans BuiltinPackRegistry :
+
+```python
+def load(self, pack_id: str) -> dict:
+    """
+    Charge et retourne le pack YAML correspondant à pack_id.
+    Accepte : finance_v1, health_v1, career_v1
+    Raise ValueError si pack_id inconnu.
+    """
+    return self.get(pack_id)
+```
+
+[NE PAS MODIFIER]
+- La logique de get() existante
+- Les autres modules
+
+[QUAND C'EST FAIT]
+Place work_result.json ici : results/FC-FCE-AC005/work_result.json
+```json
+{
+  "card_id": "FC-FCE-AC005",
+  "status": "PASS",
+  "files_changed": ["src/fce/registry.py"],
+  "test_results": {"T-005": "pass"},
+  "confidence": 0.95,
+  "notes": "load() ajoutée, délègue à get()"
+}
+```
+git add results/FC-FCE-AC005/work_result.json
+git commit -m "refactor: FC-FCE-AC005 load() added"
+git push

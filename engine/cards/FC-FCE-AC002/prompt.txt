@@ -1,0 +1,67 @@
+Tu es un AI coder. Tu as une seule tâche à implémenter.
+Le projet FCE existe déjà — ne recrée pas la structure.
+
+[CONTEXTE PROJET]
+Projet : Freedom Constraint Engine (FCE) — SPEC-FCE-001
+Langage : Python 3.11+
+Le projet est déjà structuré. Lis shared/blueprint.md et shared/interfaces.py.
+
+[TA TÂCHE — AC-002]
+Critère : "Garantir qu'aucune action ne peut être à la fois autorisée et bloquée"
+Fichier cible : src/fce/output_assembler.py
+Symbole : OutputAssembler.check_mutual_exclusion
+
+Interface exacte :
+```python
+class OutputAssembler:
+    def check_mutual_exclusion(self, blocked_actions: list[str], allowed_actions: list[str]) -> bool:
+        """
+        Vérifie que blocked_actions et allowed_actions sont disjoints.
+        Retourne True si disjoints.
+        Lève ValueError avec message explicite si intersection non vide.
+        """
+        pass
+
+    def assemble(self, pack_data: dict, constraints: list[dict], score: float) -> dict:
+        """
+        Retourne : applied_constraints, reasoning, blocked_actions,
+                   allowed_actions, confidence_score
+        Appelle check_mutual_exclusion() avant de retourner.
+        """
+        pass
+```
+
+Tu dois faire passer : T-002
+
+[TESTS À IMPLÉMENTER]
+Fichier : tests/unit/test_ac_002.py
+Lancer engine.evaluate() avec fixture valide
+Asserter que blocked_actions ∩ allowed_actions = ensemble vide
+
+Fixture : tests/fixtures/valid_pack.yaml (déjà dans le projet)
+
+[RÈGLES]
+- Ne modifie que src/fce/output_assembler.py et son test
+- blocked_actions et allowed_actions ne partagent jamais d'élément
+- applied_constraints et reasoning toujours remplis
+- confidence_score toujours float dans [0.0, 1.0]
+- Résultat déterministe
+- Aucune logique métier dans engine.py
+
+[QUAND C'EST FAIT]
+1. Crée work_result.json :
+{
+  "card_id": "FC-FCE-AC002",
+  "status": "PASS",
+  "files_changed": ["src/fce/output_assembler.py", "tests/unit/test_ac_002.py"],
+  "test_results": {"T-002": "pass"},
+  "confidence": 0.95,
+  "notes": ""
+}
+
+2. Place-le ici : results/FC-FCE-AC002/work_result.json
+
+3. Push :
+   git add results/FC-FCE-AC002/work_result.json
+   git commit -m "result: FC-FCE-AC002 PASS"
+   git push

@@ -9,5 +9,5 @@ def test_t003_completeness():
     input_data = {"domain": "valid_pack", "structured_metrics": {"amount": 1500}, "user_declared": {}}
     result = engine.evaluate(input_data)
     assert "error" not in result, result
-    assert len(result["applied_constraints"]) > 0
+    assert len(result["evaluated_constraints"]) > 0
     assert len(result["reasoning"]) > 0

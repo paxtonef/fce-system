@@ -18,8 +18,8 @@ class OutputAssembler:
             "allowed_actions",
             "blocked_actions",
             "discouraged_actions",
-            "priority_actions",
-            "applied_constraints",
+            "priority_bucket",
+            "evaluated_constraints",
             "reasoning",
             "flags",
         ]
@@ -29,7 +29,7 @@ class OutputAssembler:
                 raise ValueError(f"Missing required output key: '{key}'")
 
         for list_key in ("allowed_actions", "blocked_actions", "discouraged_actions",
-                         "priority_actions", "applied_constraints", "flags"):
+                         "priority_bucket", "evaluated_constraints", "flags"):
             if not isinstance(raw_output[list_key], list):
                 raw_output[list_key] = list(raw_output[list_key])
 
@@ -65,11 +65,11 @@ class OutputAssembler:
         return True
 
     def assert_completeness(self, output: Dict[str, Any]) -> None:
-        applied = output.get("applied_constraints")
+        applied = output.get("evaluated_constraints")
         reasoning = output.get("reasoning")
 
         if not applied:
-            raise ValueError("output['applied_constraints'] is empty or None")
+            raise ValueError("output['evaluated_constraints'] is empty or None")
 
         if not reasoning:
             raise ValueError("output['reasoning'] is empty or None")

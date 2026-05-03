@@ -52,7 +52,7 @@ def test_ac005_no_single_action_selection(engine, valid_input):
     assert "priority_action" not in result
     assert "selected_action" not in result
     assert "executed_action" not in result
-    assert "priority_actions" in result
+    assert "priority_bucket" in result
 
 
 def test_ac006_builtin_pack_load(engine):
@@ -119,8 +119,8 @@ def test_ac011_blocked_status_halt(engine, valid_input, monkeypatch):
             "allowed_actions": [],
             "blocked_actions": ["A001"],
             "discouraged_actions": [],
-            "priority_actions": ["A001"],
-            "applied_constraints": [{"id": "C001"}],
+            "priority_bucket": ["A001"],
+            "evaluated_constraints": [{"id": "C001"}],
             "reasoning": "Test",
             "flags": [],
         }
@@ -148,8 +148,8 @@ def test_ac012_output_schema_completeness(engine, valid_input):
         "allowed_actions",
         "blocked_actions",
         "discouraged_actions",
-        "priority_actions",
-        "applied_constraints",
+        "priority_bucket",
+        "evaluated_constraints",
         "reasoning",
         "flags",
         "metadata",

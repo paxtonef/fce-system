@@ -1,41 +1,30 @@
-"""POST /evaluate — transport layer only. No business logic."""
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Any
+from app.schemas.evaluate import EvaluateInput
+from app.dependencies.engine import get_engine
 
 router = APIRouter()
 
-
-class EvaluateRequest(BaseModel):
-    domain: str
-    structured_metrics: dict[str, Any]
-    user_declared: dict[str, Any]
-    optional_external: dict[str, Any] | None = None
-    domain_constraint_pack: dict[str, Any] | None = None
+# Map FCE error types to HTTP status codes
+_ERROR_STATUS = {
+    "validation_error": 422,
+    "unsupported_domain_error": 404,
+    "pack_validation_error": 422,
+    "coherence_error": 500,
+    "domain_hard_constraint_triggered": 409,
+    "output_assembly_error": 500,
+    "system_rule_violation": 500,
+}
 
 
 @router.post("/evaluate")
-def evaluate(request: EvaluateRequest):
-    """
-    Expose engine.evaluate() via HTTP.
-    Transport layer only — no business logic beyond input validation.
-    """
-    try:
-        import sys, os
-        # Support local dev without pip install
-        engine_src = os.environ.get(
-            "FCE_ENGINE_PATH",
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "spec-fce-001-cards", "src")
-        )
-        if engine_src not in sys.path:
-            sys.path.insert(0, engine_src)
+def evaluate(request: EvaluateInput):
+    """Evaluate input_data against FCE engine and return decision space."""
+    engine = get_engine()
+    result = engine.evaluate(request.model_dump())
 
-        from fce.engine import Engine
-        engine = Engine()
-        result = engine.evaluate(request.domain)
-        return result
+    if "error" in result:
+        err = result["error"]
+        status = _ERROR_STATUS.get(err["type"], 400)
+        raise HTTPException(status_code=status, detail=err)
 
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return result

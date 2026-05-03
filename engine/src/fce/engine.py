@@ -118,8 +118,8 @@ class Engine:
             "allowed_actions": list(constraint_result.get("allowed_actions", [])),
             "blocked_actions": list(constraint_result.get("blocked_actions", [])),
             "discouraged_actions": list(constraint_result.get("discouraged_actions", [])),
-            "priority_actions": list(constraint_result.get("priority_actions", [])),
-            "applied_constraints": list(constraint_result.get("applied_constraints", [])),
+            "priority_bucket": list(constraint_result.get("priority_bucket", [])),
+            "evaluated_constraints": list(constraint_result.get("evaluated_constraints", [])),
             "reasoning": str(constraint_result.get("reasoning", "")),
             "flags": list(flags) + list(constraint_result.get("flags", [])),
             "_domain": domain,
@@ -138,11 +138,11 @@ class Engine:
             )
 
         if state == "unstable":
-            overlap = set(output["priority_actions"]) & set(output["blocked_actions"])
+            overlap = set(output["priority_bucket"]) & set(output["blocked_actions"])
             if overlap:
                 return self._error(
                     "system_rule_violation",
-                    "priority_actions overlap with blocked_actions in unstable state",
+                    "priority_bucket overlap with blocked_actions in unstable state",
                 )
 
         return output

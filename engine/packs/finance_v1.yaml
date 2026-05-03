@@ -1,16 +1,60 @@
 pack_id: "finance_v1"
 domain: "finance"
+metric_thresholds:
+  monthly_income:
+    weight: 0.30
+    warning_min: 3000
+    critical_min: 1500
+  monthly_expenses:
+    weight: 0.20
+    warning_min: 2500
+    critical_min: 4000
+  total_debt:
+    weight: 0.25
+    warning_min: 30000
+    critical_min: 100000
+  liquid_assets:
+    weight: 0.15
+    warning_max: 2000
+    critical_max: 500
+  dependents:
+    weight: 0.10
+    warning_min: 3
+    critical_min: 5
+thresholds:
+  unstable_max: 0.35
+  stable_max: 0.75
 constraints:
   - id: "C001"
-    condition: "amount > 10000"
+    condition: "total_debt > 50000"
     action: "block"
+    hard: false
   - id: "C002"
-    condition: "risk_score > 0.8"
+    condition: "monthly_income < 2000"
+    action: "block"
+    hard: false
+  - id: "C003"
+    condition: "liquid_assets < 1000"
     action: "review"
+    hard: false
+  - id: "C004"
+    condition: "dependents > 4"
+    action: "caution"
+    hard: false
 actions:
   - id: "A001"
-    name: "transfer"
+    name: "aggressive_investment"
     risk_level: "high"
+    priority: false
   - id: "A002"
-    name: "withdraw"
+    name: "debt_consolidation"
     risk_level: "medium"
+    priority: true
+  - id: "A003"
+    name: "emergency_fund_build"
+    risk_level: "low"
+    priority: false
+  - id: "A004"
+    name: "expense_audit"
+    risk_level: "low"
+    priority: false

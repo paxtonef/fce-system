@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FCE — Decision Space Viewer</title>
+<style>
+:root{--bg:#0f1115;--surface:#181b21;--surface-hover:#1f232b;--border:#2a2f3a;--text:#e2e4e9;--text-muted:#8b92a8;--accent:#3b82f6;--accent-hover:#2563eb;--danger:#ef4444;--warning:#f59e0b;--success:#10b981;--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
+.container{max-width:720px;margin:0 auto;padding:2rem 1rem;width:100%;flex:1}
+h1{font-size:1.5rem;margin-bottom:.5rem}
+.subtitle{color:var(--text-muted);margin-bottom:2rem;font-size:.95rem}
+.page{display:none;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.5rem;cursor:pointer;transition:all .15s;text-align:center}
+.card:hover{background:var(--surface-hover);border-color:var(--accent)}
+.card.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(59,130,246,.2)}
+.card h3{font-size:1.1rem;margin-bottom:.25rem}
+.card p{font-size:.85rem;color:var(--text-muted)}
+.form-group{margin-bottom:1.25rem}
+label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.4rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em}
+input,textarea,select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.65rem .8rem;border-radius:8px;font-size:1rem;font-family:inherit}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px}
+.btn-row{display:flex;gap:.75rem;margin-top:2rem}
+.btn{padding:.65rem 1.25rem;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.95rem;cursor:pointer;font-weight:500}
+.btn:hover{background:var(--surface-hover)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.result-header{margin-bottom:1.5rem}
+.badge{display:inline-block;padding:.35rem .75rem;border-radius:6px;font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.badge-state-stable{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.3)}
+.badge-state-unstable{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.3)}
+.badge-state-critical{background:rgba(239,68,68,.15);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
+.badge-flag{background:rgba(245,158,11,.12);color:var(--warning);border:1px solid rgba(245,158,11,.25)}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+.section h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.75rem}
+.section ul{list-style:none}
+.section li{padding:.35rem 0;font-size:.95rem}
+.section li::before{content:"• ";color:var(--text-muted)}
+.allowed li::before{color:var(--success)}
+.blocked li::before{color:var(--danger)}
+.priority li::before{color:var(--warning)}
+.confidence-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:.5rem}
+.confidence-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s ease}
+.reasoning-box{background:#111318;border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85rem;color:var(--text-muted);white-space:pre-wrap;line-height:1.6}
+.constraints-table{width:100%;border-collapse:collapse;font-size:.9rem}
+.constraints-table td{padding:.5rem 0;border-bottom:1px solid var(--border)}
+.constraints-table td:last-child{text-align:right;color:var(--text-muted)}
+.constraints-table tr:last-child td{border-bottom:none}
+.footer-ux{margin-top:2rem;padding:1rem;border:1px dashed var(--border);border-radius:8px;text-align:center;color:var(--text-muted);font-size:.85rem}
+.loading{display:none;align-items:center;gap:.5rem;color:var(--text-muted);font-size:.9rem}
+.loading.active{display:flex}
+.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-banner{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--danger);padding:.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:.9rem;display:none}
+.error-banner.active{display:block}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="page active" id="page-domain">
+<h1>Select Domain</h1>
+<p class="subtitle">FCE evaluates your situation within a specific domain.</p>
+<div class="card-grid" id="domain-grid">
+<div class="card" data-domain="finance"><h3>Finance</h3><p>Income, debt, liquidity, risk</p></div>
+<div class="card" data-domain="health"><h3>Health</h3><p>Vitals, symptoms, history</p></div>
+<div class="card" data-domain="career"><h3>Career</h3><p>Skills, market, stability</p></div>
+</div>
+<div class="btn-row"><button class="btn btn-primary" id="btn-to-input" disabled>Continue →</button></div>
+</div>
+<div class="page" id="page-input">
+<h1>Situation Input</h1>
+<p class="subtitle">Enter structured metrics and any additional context.</p>
+<div id="metrics-container"></div>
+<div class="form-group">
+<label for="user-declared">User Declared Context (optional)</label>
+<textarea id="user-declared" placeholder="Any additional context you want to declare..."></textarea>
+</div>
+<div class="error-banner" id="error-banner"></div>
+<div class="loading" id="loading"><div class="spinner"></div><span>Evaluating decision space...</span></div>
+<div class="btn-row">
+<button class="btn" id="btn-back-domain">← Back</button>
+<button class="btn btn-primary" id="btn-evaluate">Evaluate</button>
+</div>
+</div>
+<div class="page" id="page-result">
+<div class="result-header">
+<h1>Decision Space</h1>
+<p class="subtitle">FCE does not decide for you. It shows which actions are valid, blocked, or require caution.</p>
+</div>
+<div class="section"><h4>State</h4><span class="badge" id="res-state">—</span></div>
+<div class="section">
+<h4>Confidence</h4>
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span id="res-confidence-score">0.00</span>
+<span class="badge" id="res-confidence-label" style="background:transparent;border-color:var(--text-muted);color:var(--text-muted)">—</span>
+</div>
+<div class="confidence-bar"><div class="confidence-fill" id="res-confidence-bar" style="width:0%"></div></div>
+</div>
+<div class="section" id="sec-flags" style="display:none"><h4>Flags</h4><div id="res-flags"></div></div>
+<div class="section"><h4>Valid Action Space</h4><ul class="allowed" id="res-allowed"><li>None</li></ul></div>
+<div class="section"><h4>Blocked by Constraints</h4><ul class="blocked" id="res-blocked"><li>None</li></ul></div>
+<div class="section"><h4>Priority Bucket</h4><ul class="priority" id="res-priority"><li>None</li></ul></div>
+<div class="section"><h4>Evaluated Constraints</h4><table class="constraints-table" id="res-constraints"></table></div>
+<div class="section"><h4>Reasoning</h4><div class="reasoning-box" id="res-reasoning">—</div></div>
+<div class="footer-ux">FCE is a filter, not a decision-maker. Downstream method required to select from valid actions.</div>
+<div class="btn-row"><button class="btn" id="btn-back-input">← New Evaluation</button></div>
+</div>
+</div>
+<script>
+const API_URL="http://localhost:8000/evaluate",USE_MOCK=false;
+const DOMAINS={
+finance:{label:"Finance",metrics:[{key:"monthly_income",label:"Monthly Income",type:"number"},{key:"monthly_expenses",label:"Monthly Expenses",type:"number"},{key:"total_debt",label:"Total Debt",type:"number"},{key:"liquid_assets",label:"Liquid Assets",type:"number"},{key:"dependents",label:"Number of Dependents",type:"number"}]},
+health:{label:"Health",metrics:[{key:"age",label:"Age",type:"number"},{key:"bmi",label:"BMI",type:"number",step:.1},{key:"resting_hr",label:"Resting Heart Rate",type:"number"},{key:"symptom_count",label:"Active Symptoms Count",type:"number"},{key:"chronic_conditions",label:"Chronic Conditions Count",type:"number"}]},
+career:{label:"Career",metrics:[{key:"years_experience",label:"Years of Experience",type:"number"},{key:"current_income",label:"Current Annual Income",type:"number"},{key:"market_demand_score",label:"Market Demand Score (1-10)",type:"number",min:1,max:10},{key:"skill_gaps",label:"Skill Gaps Count",type:"number"},{key:"network_strength",label:"Network Strength (1-10)",type:"number",min:1,max:10}]}
+};
+let selectedDomain=null;
+function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active")}
+document.querySelectorAll("#domain-grid .card").forEach(card=>{card.addEventListener("click",()=>{document.querySelectorAll("#domain-grid .card").forEach(c=>c.classList.remove("selected"));card.classList.add("selected");selectedDomain=card.dataset.domain;document.getElementById("btn-to-input").disabled=false})});
+document.getElementById("btn-to-input").addEventListener("click",()=>{if(!selectedDomain)return;buildMetricsForm();showPage("page-input")});
+function buildMetricsForm(){const container=document.getElementById("metrics-container");container.innerHTML="";const defs=DOMAINS[selectedDomain].metrics;defs.forEach(m=>{const div=document.createElement("div");div.className="form-group";const inputAttrs=`type="${m.type}" id="metric-${m.key}" name="${m.key}" placeholder="${m.label}" ${m.min!==undefined?`min="${m.min}"`:""} ${m.max!==undefined?`max="${m.max}"`:""} ${m.step!==undefined?`step="${m.step}"`:""}`;div.innerHTML=`<label for="metric-${m.key}">${m.label}</label><input ${inputAttrs} />`;container.appendChild(div)})}
+document.getElementById("btn-back-domain").addEventListener("click",()=>showPage("page-domain"));
+document.getElementById("btn-evaluate").addEventListener("click",async()=>{const structured_metrics={};const defs=DOMAINS[selectedDomain].metrics;for(const m of defs){const val=document.getElementById(`metric-${m.key}`).value;structured_metrics[m.key]=m.type==="number"?(val===""?null:Number(val)):val}const user_declared_text=document.getElementById("user-declared").value.trim();const payload={domain:selectedDomain+"_v1",structured_metrics:structured_metrics,user_declared:user_declared_text?{context:user_declared_text}:{}};const errorBanner=document.getElementById("error-banner");const loading=document.getElementById("loading");errorBanner.classList.remove("active");errorBanner.textContent="";loading.classList.add("active");try{let result;if(USE_MOCK){await new Promise(r=>setTimeout(r,600));result=getMockResult()}else{const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});if(!res.ok){const errText=await res.text();throw new Error(`HTTP ${res.status}: ${errText}`)}result=await res.json()}renderResult(result);showPage("page-result")}catch(err){errorBanner.textContent="Evaluation failed: "+err.message;errorBanner.classList.add("active")}finally{loading.classList.remove("active")}});
+function renderResult(r){const stateEl=document.getElementById("res-state");stateEl.textContent=r.state||"UNKNOWN";stateEl.className="badge badge-state-"+(r.state?r.state.toLowerCase():"unknown");const score=typeof r.confidence_score==="number"?r.confidence_score:0;document.getElementById("res-confidence-score").textContent=score.toFixed(2);document.getElementById("res-confidence-bar").style.width=score*100+"%";const label=r.confidence_label||(score<.4?"LOW_CONFIDENCE":score<.7?"MEDIUM_CONFIDENCE":"HIGH_CONFIDENCE");const labelEl=document.getElementById("res-confidence-label");labelEl.textContent=label;labelEl.style.color=score<.4?"var(--warning)":score<.7?"var(--text)":"var(--success)";labelEl.style.borderColor=score<.4?"var(--warning)":score<.7?"var(--text)":"var(--success)";const flagsContainer=document.getElementById("res-flags");const flagsSec=document.getElementById("sec-flags");if(r.flags&&r.flags.length>0){flagsSec.style.display="block";flagsContainer.innerHTML=r.flags.map(f=>`<span class="badge badge-flag" style="margin-right:.5rem">${f}</span>`).join("")}else{flagsSec.style.display="none";flagsContainer.innerHTML=""}const allowedEl=document.getElementById("res-allowed");if(r.allowed_actions&&r.allowed_actions.length>0){allowedEl.innerHTML=r.allowed_actions.map(a=>`<li>${a}</li>`).join("")}else{allowedEl.innerHTML="<li>None</li>"}const blockedEl=document.getElementById("res-blocked");if(r.blocked_actions&&r.blocked_actions.length>0){blockedEl.innerHTML=r.blocked_actions.map(a=>`<li>${a}</li>`).join("")}else{blockedEl.innerHTML="<li>None</li>"}const priorityEl=document.getElementById("res-priority");if(r.priority_bucket&&r.priority_bucket.length>0){priorityEl.innerHTML=r.priority_bucket.map(a=>`<li>${a}</li>`).join("")}else{priorityEl.innerHTML="<li>None</li>"}const constraintsEl=document.getElementById("res-constraints");if(Array.isArray(r.evaluated_constraints)&&r.evaluated_constraints.length>0){constraintsEl.innerHTML=r.evaluated_constraints.map(c=>`<tr><td>${c.id}</td><td>${c.activated?"ACTIVATED":"not activated"}</td></tr>`).join("")}else if(r.evaluated_constraints&&typeof r.evaluated_constraints==="object"&&Object.keys(r.evaluated_constraints).length>0){constraintsEl.innerHTML=Object.entries(r.evaluated_constraints).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("")}else{constraintsEl.innerHTML="<tr><td>No constraints evaluated</td><td></td></tr>"}document.getElementById("res-reasoning").textContent=r.reasoning||"No reasoning provided."}
+document.getElementById("btn-back-input").addEventListener("click",()=>{document.getElementById("user-declared").value="";showPage("page-input")});
+function getMockResult(){return{state:"UNSTABLE",confidence_score:.24,confidence_label:"LOW_CONFIDENCE",flags:["DATA_GAP"],allowed_actions:["A002","A003"],blocked_actions:["A001"],priority_bucket:["A002"],evaluated_constraints:[{id:"C001",activated:false},{id:"C002",activated:false}],reasoning:"Domain finance state=unstable due to negative cash flow and high debt ratio. Confidence is low because liquid_assets data is missing. A001 is blocked by constraint C001 (insufficient liquidity buffer). A002 and A003 remain in valid action space. Priority bucket surfaces A002 as first item due to lower risk profile. Downstream decision method required to select between A002 and A003."}}
+</script>
+</body>
+</html>

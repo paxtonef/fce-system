@@ -2,11 +2,11 @@ pack_id: "finance_v1"
 domain: "finance"
 metric_thresholds:
   monthly_income:
-    weight: 0.30
+    weight: 0.20
     warning_min: 3000
     critical_min: 1500
   monthly_expenses:
-    weight: 0.20
+    weight: 0.15
     warning_min: 2500
     critical_min: 4000
   total_debt:
@@ -14,11 +14,11 @@ metric_thresholds:
     warning_min: 30000
     critical_min: 100000
   liquid_assets:
-    weight: 0.15
+    weight: 0.25
     warning_max: 2000
     critical_max: 500
   dependents:
-    weight: 0.10
+    weight: 0.15
     warning_min: 3
     critical_min: 5
 thresholds:
@@ -41,6 +41,22 @@ constraints:
     condition: "dependents > 4"
     action: "caution"
     hard: false
+  - id: "C005"
+    condition: "monthly_expenses > monthly_income"
+    action: "block"
+    hard: false
+  - id: "C006"
+    condition: "liquid_assets < 500"
+    action: "caution"
+    hard: false
+  - id: "C007"
+    condition: "total_debt > 100000"
+    action: "block"
+    hard: true
+  - id: "C008"
+    condition: "monthly_income < 1500"
+    action: "block"
+    hard: true
 actions:
   - id: "A001"
     name: "aggressive_investment"
@@ -56,5 +72,21 @@ actions:
     priority: false
   - id: "A004"
     name: "expense_audit"
+    risk_level: "low"
+    priority: false
+  - id: "A005"
+    name: "income_increase_plan"
+    risk_level: "medium"
+    priority: true
+  - id: "A006"
+    name: "budget_optimization"
+    risk_level: "low"
+    priority: false
+  - id: "A007"
+    name: "debt_repayment_accelerated"
+    risk_level: "medium"
+    priority: true
+  - id: "A008"
+    name: "financial_buffer_build"
     risk_level: "low"
     priority: false

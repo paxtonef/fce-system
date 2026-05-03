@@ -1,0 +1,6 @@
+pack_id: "finance_v2"
+domain: "finance"
+version: "2.0.0"
+status: "REQUIRES_BACKEND_V2"
+# Spec complete stored for future backend upgrade
+# See finance_v1.yaml for current compatible pack

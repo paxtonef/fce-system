@@ -5,86 +5,126 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FCE — Decision Space Viewer</title>
 <style>
-:root{--bg:#0f1115;--surface:#181b21;--surface-hover:#1f232b;--border:#2a2f3a;--text:#e2e4e9;--text-muted:#8b92a8;--accent:#3b82f6;--accent-hover:#2563eb;--danger:#ef4444;--warning:#f59e0b;--success:#10b981;--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+:root{--bg:#0b0d12;--surface:#14161d;--surface-hover:#1c1f28;--border:#252a36;--text:#e8eaed;--text-muted:#8b92a8;--accent:#3b82f6;--accent-hover:#2563eb;--accent-dim:rgba(59,130,246,0.12);--danger:#ef4444;--danger-dim:rgba(239,68,68,0.12);--warning:#f59e0b;--warning-dim:rgba(245,158,11,0.12);--success:#10b981;--success-dim:rgba(16,185,129,0.12);--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
-.container{max-width:720px;margin:0 auto;padding:2rem 1rem;width:100%;flex:1}
-h1{font-size:1.5rem;margin-bottom:.5rem}
-.subtitle{color:var(--text-muted);margin-bottom:2rem;font-size:.95rem}
-.page{display:none;animation:fadeIn .2s ease}
+.container{max-width:760px;margin:0 auto;padding:2rem 1rem;width:100%;flex:1}
+.app-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.app-title{font-size:1.1rem;font-weight:700;letter-spacing:0.02em}
+.app-title span{color:var(--accent)}
+.stepper{display:flex;gap:0.5rem;align-items:center}
+.step{display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text-muted);transition:color 0.2s}
+.step.active{color:var(--text)}
+.step-num{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700}
+.step.active .step-num{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.step.done .step-num{border-color:var(--success);background:var(--success-dim);color:var(--success)}
+.step-line{width:16px;height:1px;background:var(--border)}
+.page{display:none;animation:fadeSlide 0.3s ease}
 .page.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1rem}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.5rem;cursor:pointer;transition:all .15s;text-align:center}
-.card:hover{background:var(--surface-hover);border-color:var(--accent)}
-.card.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(59,130,246,.2)}
-.card h3{font-size:1.1rem;margin-bottom:.25rem}
-.card p{font-size:.85rem;color:var(--text-muted)}
-.form-group{margin-bottom:1.25rem}
-label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.4rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em}
-input,textarea,select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.65rem .8rem;border-radius:8px;font-size:1rem;font-family:inherit}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+h1{font-size:1.4rem;margin-bottom:0.4rem;font-weight:700}
+.subtitle{color:var(--text-muted);margin-bottom:1.75rem;font-size:0.95rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1rem}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:1.75rem 1.5rem;cursor:pointer;transition:all 0.18s;text-align:center;position:relative}
+.card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.card.selected{border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 0 3px rgba(59,130,246,0.15)}
+.card h3{font-size:1.05rem;margin-bottom:0.3rem;font-weight:600}
+.card p{font-size:0.82rem;color:var(--text-muted)}
+.card .card-icon{font-size:1.5rem;margin-bottom:0.5rem;display:block}
+.form-group{margin-bottom:1.1rem}
+label{display:block;font-size:0.78rem;font-weight:600;margin-bottom:0.35rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em}
+label .required{color:var(--danger);margin-left:2px}
+input,textarea,select{width:100%;background:var(--surface);border:1.5px solid var(--border);color:var(--text);padding:0.6rem 0.75rem;border-radius:8px;font-size:0.95rem;font-family:inherit;transition:border-color 0.15s}
 input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
-textarea{resize:vertical;min-height:80px}
-.btn-row{display:flex;gap:.75rem;margin-top:2rem}
-.btn{padding:.65rem 1.25rem;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.95rem;cursor:pointer;font-weight:500}
-.btn:hover{background:var(--surface-hover)}
+input:invalid{border-color:var(--danger)}
+textarea{resize:vertical;min-height:72px}
+.field-hint{font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem}
+.field-error{color:var(--danger);font-size:0.8rem;margin-top:0.3rem;display:none}
+.field-error.active{display:block}
+.btn-row{display:flex;gap:0.75rem;margin-top:2rem;justify-content:flex-end}
+.btn{padding:0.6rem 1.2rem;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:0.9rem;cursor:pointer;font-weight:500;transition:all 0.15s}
+.btn:hover{background:var(--surface-hover);border-color:var(--text-muted)}
 .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-hover)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.result-header{margin-bottom:1.5rem}
-.badge{display:inline-block;padding:.35rem .75rem;border-radius:6px;font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-.badge-state-stable{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.3)}
-.badge-state-unstable{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.3)}
-.badge-state-critical{background:rgba(239,68,68,.15);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
-.badge-flag{background:rgba(245,158,11,.12);color:var(--warning);border:1px solid rgba(245,158,11,.25)}
-.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem}
-.section h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:.75rem}
+.btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);transform:translateY(-1px)}
+.btn:disabled{opacity:0.45;cursor:not-allowed;transform:none}
+.btn-secondary{background:transparent;border-color:var(--border);color:var(--text-muted)}
+.btn-secondary:hover{color:var(--text);border-color:var(--text-muted)}
+.result-header{margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.result-grid{display:grid;grid-template-columns:1fr;gap:0.75rem}
+@media(min-width:640px){.result-grid{grid-template-columns:1fr 1fr}}
+.badge{display:inline-flex;align-items:center;gap:0.35rem;padding:0.3rem 0.7rem;border-radius:6px;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
+.badge-state-stable{background:var(--success-dim);color:var(--success);border:1px solid rgba(16,185,129,0.25)}
+.badge-state-unstable{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,158,11,0.25)}
+.badge-state-critical{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(239,68,68,0.25)}
+.badge-state-unknown{background:rgba(139,146,168,0.12);color:var(--text-muted);border:1px solid rgba(139,146,168,0.25)}
+.badge-flag{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,158,11,0.2)}
+.section{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem}
+.section h4{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.6rem;font-weight:600}
 .section ul{list-style:none}
-.section li{padding:.35rem 0;font-size:.95rem}
-.section li::before{content:"• ";color:var(--text-muted)}
-.allowed li::before{color:var(--success)}
-.blocked li::before{color:var(--danger)}
-.priority li::before{color:var(--warning)}
-.confidence-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:.5rem}
-.confidence-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s ease}
-.reasoning-box{background:#111318;border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85rem;color:var(--text-muted);white-space:pre-wrap;line-height:1.6}
-.constraints-table{width:100%;border-collapse:collapse;font-size:.9rem}
-.constraints-table td{padding:.5rem 0;border-bottom:1px solid var(--border)}
+.section li{padding:0.25rem 0;font-size:0.9rem;display:flex;align-items:center;gap:0.4rem}
+.section li::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--text-muted)}
+.allowed li::before{background:var(--success)}
+.blocked li::before{background:var(--danger)}
+.priority li::before{background:var(--warning)}
+.empty-state{color:var(--text-muted);font-style:italic}
+.confidence-wrap{display:flex;align-items:center;gap:0.75rem;margin-top:0.3rem}
+.confidence-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.confidence-fill{height:100%;background:var(--accent);border-radius:3px;transition:width 0.5s ease}
+.confidence-score{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.95rem;font-weight:600;min-width:3ch}
+.flags-wrap{display:flex;flex-wrap:wrap;gap:0.4rem}
+.constraints-table{width:100%;border-collapse:collapse;font-size:0.88rem}
+.constraints-table td{padding:0.4rem 0;border-bottom:1px solid var(--border)}
 .constraints-table td:last-child{text-align:right;color:var(--text-muted)}
 .constraints-table tr:last-child td{border-bottom:none}
-.footer-ux{margin-top:2rem;padding:1rem;border:1px dashed var(--border);border-radius:8px;text-align:center;color:var(--text-muted);font-size:.85rem}
-.loading{display:none;align-items:center;gap:.5rem;color:var(--text-muted);font-size:.9rem}
-.loading.active{display:flex}
-.spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+.reasoning-box{background:#0e1016;border:1.5px solid var(--border);border-radius:8px;padding:0.9rem 1rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.82rem;color:var(--text-muted);white-space:pre-wrap;line-height:1.6}
+.footer-ux{margin-top:1.5rem;padding:0.9rem;border:1.5px dashed var(--border);border-radius:8px;text-align:center;color:var(--text-muted);font-size:0.82rem;background:rgba(139,146,168,0.04)}
+.loading-overlay{display:none;align-items:center;justify-content:center;gap:0.6rem;color:var(--text-muted);font-size:0.9rem;padding:1rem 0}
+.loading-overlay.active{display:flex}
+.spinner{width:18px;height:18px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.error-banner{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--danger);padding:.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:.9rem;display:none}
-.error-banner.active{display:block}
+.error-banner{background:var(--danger-dim);border:1.5px solid rgba(239,68,68,0.25);color:var(--danger);padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.88rem;display:none;align-items:flex-start;gap:0.5rem}
+.error-banner.active{display:flex}
+.error-banner::before{content:"⚠";font-size:1rem}
+.mock-toggle{position:fixed;bottom:1rem;right:1rem;z-index:50}
+.mock-toggle label{display:flex;align-items:center;gap:0.4rem;background:var(--surface);border:1px solid var(--border);padding:0.35rem 0.7rem;border-radius:6px;font-size:0.75rem;color:var(--text-muted);cursor:pointer;text-transform:none;letter-spacing:normal}
+.mock-toggle input{margin:0}
 </style>
 </head>
 <body>
 <div class="container">
+<div class="app-header">
+<div class="app-title">FCE <span>Decision Space</span></div>
+<div class="stepper">
+<div class="step active" id="step-1"><div class="step-num">1</div><span>Domain</span></div>
+<div class="step-line"></div>
+<div class="step" id="step-2"><div class="step-num">2</div><span>Input</span></div>
+<div class="step-line"></div>
+<div class="step" id="step-3"><div class="step-num">3</div><span>Result</span></div>
+</div>
+</div>
 <div class="page active" id="page-domain">
 <h1>Select Domain</h1>
-<p class="subtitle">FCE evaluates your situation within a specific domain.</p>
+<p class="subtitle">Choose the context for your situation evaluation.</p>
 <div class="card-grid" id="domain-grid">
-<div class="card" data-domain="finance"><h3>Finance</h3><p>Income, debt, liquidity, risk</p></div>
-<div class="card" data-domain="health"><h3>Health</h3><p>Vitals, symptoms, history</p></div>
-<div class="card" data-domain="career"><h3>Career</h3><p>Skills, market, stability</p></div>
+<div class="card" data-domain="finance"><span class="card-icon">💰</span><h3>Finance</h3><p>Income, debt, liquidity, risk exposure</p></div>
+<div class="card" data-domain="health"><span class="card-icon">🫀</span><h3>Health</h3><p>Vitals, symptoms, history, risk factors</p></div>
+<div class="card" data-domain="career"><span class="card-icon">🎯</span><h3>Career</h3><p>Skills, market demand, stability, gaps</p></div>
 </div>
 <div class="btn-row"><button class="btn btn-primary" id="btn-to-input" disabled>Continue →</button></div>
 </div>
 <div class="page" id="page-input">
-<h1>Situation Input</h1>
-<p class="subtitle">Enter structured metrics and any additional context.</p>
+<h1 id="input-title">Situation Input</h1>
+<p class="subtitle">Enter the structured metrics for this domain. All numeric fields are required.</p>
 <div id="metrics-container"></div>
 <div class="form-group">
-<label for="user-declared">User Declared Context (optional)</label>
-<textarea id="user-declared" placeholder="Any additional context you want to declare..."></textarea>
+<label for="user-declared">Additional Context <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+<textarea id="user-declared" placeholder="Any free-form context you want to declare..."></textarea>
+<div class="field-hint">This is wrapped as <code>{context: "..."}</code> and sent to the engine.</div>
 </div>
 <div class="error-banner" id="error-banner"></div>
-<div class="loading" id="loading"><div class="spinner"></div><span>Evaluating decision space...</span></div>
+<div class="loading-overlay" id="loading"><div class="spinner"></div><span>Evaluating decision space...</span></div>
 <div class="btn-row">
-<button class="btn" id="btn-back-domain">← Back</button>
+<button class="btn btn-secondary" id="btn-back-domain">← Back</button>
 <button class="btn btn-primary" id="btn-evaluate">Evaluate</button>
 </div>
 </div>
@@ -93,42 +133,52 @@ textarea{resize:vertical;min-height:80px}
 <h1>Decision Space</h1>
 <p class="subtitle">FCE does not decide for you. It shows which actions are valid, blocked, or require caution.</p>
 </div>
+<div class="result-grid">
 <div class="section"><h4>State</h4><span class="badge" id="res-state">—</span></div>
 <div class="section">
 <h4>Confidence</h4>
-<div style="display:flex;justify-content:space-between;align-items:center">
-<span id="res-confidence-score">0.00</span>
-<span class="badge" id="res-confidence-label" style="background:transparent;border-color:var(--text-muted);color:var(--text-muted)">—</span>
-</div>
+<div class="confidence-wrap">
 <div class="confidence-bar"><div class="confidence-fill" id="res-confidence-bar" style="width:0%"></div></div>
+<span class="confidence-score" id="res-confidence-score">0.00</span>
+<span class="badge" id="res-confidence-label">—</span>
 </div>
-<div class="section" id="sec-flags" style="display:none"><h4>Flags</h4><div id="res-flags"></div></div>
-<div class="section"><h4>Valid Action Space</h4><ul class="allowed" id="res-allowed"><li>None</li></ul></div>
-<div class="section"><h4>Blocked by Constraints</h4><ul class="blocked" id="res-blocked"><li>None</li></ul></div>
-<div class="section"><h4>Priority Bucket</h4><ul class="priority" id="res-priority"><li>None</li></ul></div>
+</div>
+</div>
+<div class="section" id="sec-flags" style="display:none">
+<h4>Flags</h4>
+<div class="flags-wrap" id="res-flags"></div>
+</div>
+<div class="result-grid">
+<div class="section"><h4>Valid Action Space</h4><ul class="allowed" id="res-allowed"><li class="empty-state">No actions currently valid</li></ul></div>
+<div class="section"><h4>Blocked by Constraints</h4><ul class="blocked" id="res-blocked"><li class="empty-state">No actions currently blocked</li></ul></div>
+</div>
+<div class="section"><h4>Priority Bucket</h4><ul class="priority" id="res-priority"><li class="empty-state">Empty</li></ul></div>
 <div class="section"><h4>Evaluated Constraints</h4><table class="constraints-table" id="res-constraints"></table></div>
 <div class="section"><h4>Reasoning</h4><div class="reasoning-box" id="res-reasoning">—</div></div>
-<div class="footer-ux">FCE is a filter, not a decision-maker. Downstream method required to select from valid actions.</div>
-<div class="btn-row"><button class="btn" id="btn-back-input">← New Evaluation</button></div>
+<div class="footer-ux"><strong>FCE is a filter, not a decision-maker.</strong><br>A downstream method is required to select from the valid action space.</div>
+<div class="btn-row" style="justify-content:flex-start"><button class="btn btn-secondary" id="btn-back-input">← New Evaluation</button></div>
 </div>
 </div>
+<div class="mock-toggle"><label><input type="checkbox" id="mock-check"/> Mock mode (no backend)</label></div>
 <script>
-const API_URL="http://localhost:8000/evaluate",USE_MOCK=false;
+const API_URL="http://localhost:8000/evaluate";
 const DOMAINS={
-finance:{label:"Finance",metrics:[{key:"monthly_income",label:"Monthly Income",type:"number"},{key:"monthly_expenses",label:"Monthly Expenses",type:"number"},{key:"total_debt",label:"Total Debt",type:"number"},{key:"liquid_assets",label:"Liquid Assets",type:"number"},{key:"dependents",label:"Number of Dependents",type:"number"}]},
-health:{label:"Health",metrics:[{key:"age",label:"Age",type:"number"},{key:"bmi",label:"BMI",type:"number",step:.1},{key:"resting_hr",label:"Resting Heart Rate",type:"number"},{key:"symptom_count",label:"Active Symptoms Count",type:"number"},{key:"chronic_conditions",label:"Chronic Conditions Count",type:"number"}]},
-career:{label:"Career",metrics:[{key:"years_experience",label:"Years of Experience",type:"number"},{key:"current_income",label:"Current Annual Income",type:"number"},{key:"market_demand_score",label:"Market Demand Score (1-10)",type:"number",min:1,max:10},{key:"skill_gaps",label:"Skill Gaps Count",type:"number"},{key:"network_strength",label:"Network Strength (1-10)",type:"number",min:1,max:10}]}
+finance:{label:"Finance",metrics:[{key:"monthly_income",label:"Monthly Income",type:"number",hint:"Gross monthly income in your local currency"},{key:"monthly_expenses",label:"Monthly Expenses",type:"number",hint:"Total fixed + variable monthly outflows"},{key:"total_debt",label:"Total Debt",type:"number",hint:"All outstanding liabilities"},{key:"liquid_assets",label:"Liquid Assets",type:"number",hint:"Cash + assets convertible within 30 days"},{key:"dependents",label:"Dependents",type:"number",hint:"Number of people financially dependent on you",min:0}]},
+health:{label:"Health",metrics:[{key:"age",label:"Age",type:"number",hint:"Current age in years",min:0,max:120},{key:"bmi",label:"BMI",type:"number",step:0.1,hint:"Body Mass Index"},{key:"resting_hr",label:"Resting Heart Rate",type:"number",hint:"Beats per minute at rest",min:30,max:200},{key:"symptom_count",label:"Active Symptoms",type:"number",hint:"Number of current symptoms being tracked",min:0},{key:"chronic_conditions",label:"Chronic Conditions",type:"number",hint:"Diagnosed long-term conditions",min:0}]},
+career:{label:"Career",metrics:[{key:"years_experience",label:"Years Experience",type:"number",hint:"Total years in current field",min:0},{key:"current_income",label:"Annual Income",type:"number",hint:"Current yearly gross income"},{key:"market_demand_score",label:"Market Demand",type:"number",min:1,max:10,hint:"1 = oversaturated, 10 = extreme shortage"},{key:"skill_gaps",label:"Skill Gaps",type:"number",hint:"Critical skills you lack vs. market requirements",min:0},{key:"network_strength",label:"Network Strength",type:"number",min:1,max:10,hint:"1 = isolated, 10 = highly connected"}]}
 };
 let selectedDomain=null;
-function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active")}
-document.querySelectorAll("#domain-grid .card").forEach(card=>{card.addEventListener("click",()=>{document.querySelectorAll("#domain-grid .card").forEach(c=>c.classList.remove("selected"));card.classList.add("selected");selectedDomain=card.dataset.domain;document.getElementById("btn-to-input").disabled=false})});
-document.getElementById("btn-to-input").addEventListener("click",()=>{if(!selectedDomain)return;buildMetricsForm();showPage("page-input")});
-function buildMetricsForm(){const container=document.getElementById("metrics-container");container.innerHTML="";const defs=DOMAINS[selectedDomain].metrics;defs.forEach(m=>{const div=document.createElement("div");div.className="form-group";const inputAttrs=`type="${m.type}" id="metric-${m.key}" name="${m.key}" placeholder="${m.label}" ${m.min!==undefined?`min="${m.min}"`:""} ${m.max!==undefined?`max="${m.max}"`:""} ${m.step!==undefined?`step="${m.step}"`:""}`;div.innerHTML=`<label for="metric-${m.key}">${m.label}</label><input ${inputAttrs} />`;container.appendChild(div)})}
+function setStep(n){[1,2,3].forEach(i=>{const el=document.getElementById("step-"+i);el.classList.remove("active","done");if(i<n)el.classList.add("done");if(i===n)el.classList.add("active");});}
+function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active");const map={"page-domain":1,"page-input":2,"page-result":3};setStep(map[id]||1);}
+document.querySelectorAll("#domain-grid .card").forEach(card=>{card.addEventListener("click",()=>{document.querySelectorAll("#domain-grid .card").forEach(c=>c.classList.remove("selected"));card.classList.add("selected");selectedDomain=card.dataset.domain;document.getElementById("btn-to-input").disabled=false;});});
+document.getElementById("btn-to-input").addEventListener("click",()=>{if(!selectedDomain)return;buildMetricsForm();document.getElementById("input-title").textContent=DOMAINS[selectedDomain].label+" — Situation Input";showPage("page-input");});
+function buildMetricsForm(){const container=document.getElementById("metrics-container");container.innerHTML="";const defs=DOMAINS[selectedDomain].metrics;defs.forEach(m=>{const div=document.createElement("div");div.className="form-group";const req=m.type==="number"?'<span class="required">*</span>':"";const attrs=`type="${m.type}" id="metric-${m.key}" name="${m.key}" placeholder="${m.label}" ${m.min!==undefined?`min="${m.min}"`:""} ${m.max!==undefined?`max="${m.max}"`:''} ${m.step!==undefined?`step="${m.step}"`:''} required`;div.innerHTML=`<label for="metric-${m.key}">${m.label}${req}</label><input ${attrs} /><div class="field-hint">${m.hint||""}</div><div class="field-error" id="err-${m.key}">Required field</div>`;container.appendChild(div);});}
 document.getElementById("btn-back-domain").addEventListener("click",()=>showPage("page-domain"));
-document.getElementById("btn-evaluate").addEventListener("click",async()=>{const structured_metrics={};const defs=DOMAINS[selectedDomain].metrics;for(const m of defs){const val=document.getElementById(`metric-${m.key}`).value;structured_metrics[m.key]=m.type==="number"?(val===""?null:Number(val)):val}const user_declared_text=document.getElementById("user-declared").value.trim();const payload={domain:selectedDomain+"_v1",structured_metrics:structured_metrics,user_declared:user_declared_text?{context:user_declared_text}:{}};const errorBanner=document.getElementById("error-banner");const loading=document.getElementById("loading");errorBanner.classList.remove("active");errorBanner.textContent="";loading.classList.add("active");try{let result;if(USE_MOCK){await new Promise(r=>setTimeout(r,600));result=getMockResult()}else{const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});if(!res.ok){const errText=await res.text();throw new Error(`HTTP ${res.status}: ${errText}`)}result=await res.json()}renderResult(result);showPage("page-result")}catch(err){errorBanner.textContent="Evaluation failed: "+err.message;errorBanner.classList.add("active")}finally{loading.classList.remove("active")}});
-function renderResult(r){const stateEl=document.getElementById("res-state");stateEl.textContent=r.state||"UNKNOWN";stateEl.className="badge badge-state-"+(r.state?r.state.toLowerCase():"unknown");const score=typeof r.confidence_score==="number"?r.confidence_score:0;document.getElementById("res-confidence-score").textContent=score.toFixed(2);document.getElementById("res-confidence-bar").style.width=score*100+"%";const label=r.confidence_label||(score<.4?"LOW_CONFIDENCE":score<.7?"MEDIUM_CONFIDENCE":"HIGH_CONFIDENCE");const labelEl=document.getElementById("res-confidence-label");labelEl.textContent=label;labelEl.style.color=score<.4?"var(--warning)":score<.7?"var(--text)":"var(--success)";labelEl.style.borderColor=score<.4?"var(--warning)":score<.7?"var(--text)":"var(--success)";const flagsContainer=document.getElementById("res-flags");const flagsSec=document.getElementById("sec-flags");if(r.flags&&r.flags.length>0){flagsSec.style.display="block";flagsContainer.innerHTML=r.flags.map(f=>`<span class="badge badge-flag" style="margin-right:.5rem">${f}</span>`).join("")}else{flagsSec.style.display="none";flagsContainer.innerHTML=""}const allowedEl=document.getElementById("res-allowed");if(r.allowed_actions&&r.allowed_actions.length>0){allowedEl.innerHTML=r.allowed_actions.map(a=>`<li>${a}</li>`).join("")}else{allowedEl.innerHTML="<li>None</li>"}const blockedEl=document.getElementById("res-blocked");if(r.blocked_actions&&r.blocked_actions.length>0){blockedEl.innerHTML=r.blocked_actions.map(a=>`<li>${a}</li>`).join("")}else{blockedEl.innerHTML="<li>None</li>"}const priorityEl=document.getElementById("res-priority");if(r.priority_bucket&&r.priority_bucket.length>0){priorityEl.innerHTML=r.priority_bucket.map(a=>`<li>${a}</li>`).join("")}else{priorityEl.innerHTML="<li>None</li>"}const constraintsEl=document.getElementById("res-constraints");if(Array.isArray(r.evaluated_constraints)&&r.evaluated_constraints.length>0){constraintsEl.innerHTML=r.evaluated_constraints.map(c=>`<tr><td>${c.id}</td><td>${c.activated?"ACTIVATED":"not activated"}</td></tr>`).join("")}else if(r.evaluated_constraints&&typeof r.evaluated_constraints==="object"&&Object.keys(r.evaluated_constraints).length>0){constraintsEl.innerHTML=Object.entries(r.evaluated_constraints).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("")}else{constraintsEl.innerHTML="<tr><td>No constraints evaluated</td><td></td></tr>"}document.getElementById("res-reasoning").textContent=r.reasoning||"No reasoning provided."}
-document.getElementById("btn-back-input").addEventListener("click",()=>{document.getElementById("user-declared").value="";showPage("page-input")});
-function getMockResult(){return{state:"UNSTABLE",confidence_score:.24,confidence_label:"LOW_CONFIDENCE",flags:["DATA_GAP"],allowed_actions:["A002","A003"],blocked_actions:["A001"],priority_bucket:["A002"],evaluated_constraints:[{id:"C001",activated:false},{id:"C002",activated:false}],reasoning:"Domain finance state=unstable due to negative cash flow and high debt ratio. Confidence is low because liquid_assets data is missing. A001 is blocked by constraint C001 (insufficient liquidity buffer). A002 and A003 remain in valid action space. Priority bucket surfaces A002 as first item due to lower risk profile. Downstream decision method required to select between A002 and A003."}}
+function validateForm(){const defs=DOMAINS[selectedDomain].metrics;let ok=true;for(const m of defs){const el=document.getElementById(`metric-${m.key}`);const err=document.getElementById(`err-${m.key}`);if(m.type==="number"&&(el.value===""||isNaN(Number(el.value)))){err.classList.add("active");ok=false;}else{err.classList.remove("active");}}return ok;}
+document.getElementById("btn-evaluate").addEventListener("click",async()=>{if(!validateForm())return;const structured_metrics={};const defs=DOMAINS[selectedDomain].metrics;for(const m of defs){const val=document.getElementById(`metric-${m.key}`).value;structured_metrics[m.key]=m.type==="number"?(val===""?null:Number(val)):val;}const user_declared_text=document.getElementById("user-declared").value.trim();const payload={domain:selectedDomain+"_v1",structured_metrics:structured_metrics,user_declared:user_declared_text?{context:user_declared_text}:{}};const errorBanner=document.getElementById("error-banner");const loading=document.getElementById("loading");errorBanner.classList.remove("active");errorBanner.textContent="";loading.classList.add("active");const USE_MOCK=document.getElementById("mock-check").checked;try{let result;if(USE_MOCK){await new Promise(r=>setTimeout(r,700));result=getMockResult();}else{const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});if(!res.ok){const errText=await res.text();let msg=`HTTP ${res.status}`;try{const d=JSON.parse(errText);msg=`HTTP ${res.status}: ${d.detail?.message||d.detail||errText}`;}catch(e){msg=`HTTP ${res.status}: ${errText}`;}if(res.status===422)msg="Invalid input. Check that all required metrics are filled correctly.";if(res.status===404)msg="Domain not supported by the backend engine.";if(res.status>=500)msg="Backend error. The evaluation engine encountered a problem.";throw new Error(msg);}result=await res.json();}renderResult(result);showPage("page-result");}catch(err){let msg=err.message;if(err.name==="TypeError"&&err.message.includes("fetch"))msg="Cannot reach backend. Is the server running on "+API_URL+"?";errorBanner.textContent=msg;errorBanner.classList.add("active");}finally{loading.classList.remove("active");}});
+function renderResult(r){const stateEl=document.getElementById("res-state");stateEl.textContent=(r.state||"UNKNOWN").toUpperCase();stateEl.className="badge badge-state-"+(r.state?r.state.toLowerCase():"unknown");const score=typeof r.confidence_score==="number"?r.confidence_score:0;document.getElementById("res-confidence-score").textContent=score.toFixed(2);document.getElementById("res-confidence-bar").style.width=(score*100)+"%";const label=r.confidence_label||(score<0.4?"LOW":score<0.7?"MEDIUM":"HIGH");const labelEl=document.getElementById("res-confidence-label");labelEl.textContent=label;labelEl.style.color=score<0.4?"var(--warning)":score<0.7?"var(--text)":"var(--success)";labelEl.style.borderColor=score<0.4?"var(--warning)":score<0.7?"var(--text)":"var(--success)";labelEl.style.background=score<0.4?"var(--warning-dim)":score<0.7?"rgba(139,146,168,0.12)":"var(--success-dim)";const flagsContainer=document.getElementById("res-flags");const flagsSec=document.getElementById("sec-flags");if(r.flags&&r.flags.length>0){const unique=[...new Set(r.flags)];flagsSec.style.display="block";flagsContainer.innerHTML=unique.map(f=>`<span class="badge badge-flag">${f}</span>`).join("");}else{flagsSec.style.display="none";flagsContainer.innerHTML="";}const allowedEl=document.getElementById("res-allowed");if(r.allowed_actions&&r.allowed_actions.length>0){allowedEl.innerHTML=r.allowed_actions.map(a=>`<li>${a}</li>`).join("");}else{allowedEl.innerHTML='<li class="empty-state">No actions currently valid</li>';}const blockedEl=document.getElementById("res-blocked");if(r.blocked_actions&&r.blocked_actions.length>0){blockedEl.innerHTML=r.blocked_actions.map(a=>`<li>${a}</li>`).join("");}else{blockedEl.innerHTML='<li class="empty-state">No actions currently blocked</li>';}const priorityEl=document.getElementById("res-priority");if(r.priority_bucket&&r.priority_bucket.length>0){priorityEl.innerHTML=r.priority_bucket.map(a=>`<li>${a}</li>`).join("");}else{priorityEl.innerHTML='<li class="empty-state">Empty</li>';}const constraintsEl=document.getElementById("res-constraints");if(Array.isArray(r.evaluated_constraints)&&r.evaluated_constraints.length>0){constraintsEl.innerHTML=r.evaluated_constraints.map(c=>`<tr><td>${c.id}</td><td>${c.activated?"✓ ACTIVATED":"not activated"}</td></tr>`).join("");}else if(r.evaluated_constraints&&typeof r.evaluated_constraints==="object"&&Object.keys(r.evaluated_constraints).length>0){constraintsEl.innerHTML=Object.entries(r.evaluated_constraints).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join("");}else{constraintsEl.innerHTML='<tr><td>No constraints evaluated</td><td></td></tr>';}document.getElementById("res-reasoning").textContent=r.reasoning||"No reasoning provided by the engine.";}
+document.getElementById("btn-back-input").addEventListener("click",()=>{document.getElementById("user-declared").value="";document.getElementById("metrics-container").innerHTML="";document.querySelectorAll("#domain-grid .card").forEach(c=>c.classList.remove("selected"));selectedDomain=null;document.getElementById("btn-to-input").disabled=true;showPage("page-domain");});
+function getMockResult(){return{state:"UNSTABLE",confidence_score:0.24,confidence_label:"LOW",flags:["DATA_GAP","UNCERTAIN"],allowed_actions:["A002","A003"],blocked_actions:["A001"],priority_bucket:["A002"],evaluated_constraints:[{id:"C001",activated:false},{id:"C002",activated:false}],reasoning:"Domain finance state=unstable due to negative cash flow and high debt ratio. Confidence is low because liquid_assets data is missing. A001 is blocked by constraint C001 (insufficient liquidity buffer). A002 and A003 remain in valid action space. Priority bucket surfaces A002 as first item due to lower risk profile. Downstream decision method required to select between A002 and A003."};}
 </script>
 </body>
 </html>

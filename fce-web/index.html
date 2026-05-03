@@ -197,7 +197,14 @@ metrics:[
 {key:"symptom_count",label:"Active Symptoms",type:"number",hint:"Number of current symptoms being tracked",min:0,required:true},
 {key:"chronic_conditions",label:"Chronic Conditions",type:"number",hint:"Diagnosed long-term conditions",min:0,required:true}
 ],
-optional:[]
+optional:[
+{key:"sleep_hours",label:"Sleep (hours/night)",type:"number",step:0.1,min:0,max:24,hint:"Average hours of sleep per night"},
+{key:"exercise_frequency",label:"Exercise (days/week)",type:"number",min:0,max:7,hint:"Days with 30+ min physical activity per week"},
+{key:"smoking_status",label:"Smoking",type:"number",min:0,hint:"Cigarettes per day (0 = non-smoker)"},
+{key:"alcohol_units",label:"Alcohol (units/week)",type:"number",step:0.1,min:0,hint:"Standard alcohol units consumed per week"},
+{key:"family_history_risk",label:"Family History Risk",type:"number",min:0,max:10,hint:"Genetic/family disease risk: 0 = none, 10 = very high"},
+{key:"last_checkup_months",label:"Last Checkup (months)",type:"number",min:0,hint:"Months since last comprehensive medical checkup"}
+]
 },
 career:{
 label:"Career",
@@ -208,7 +215,15 @@ metrics:[
 {key:"skill_gaps",label:"Skill Gaps",type:"number",hint:"Critical skills you lack vs. market requirements",min:0,required:true},
 {key:"network_strength",label:"Network Strength",type:"number",min:1,max:10,hint:"1 = isolated, 10 = highly connected",required:true}
 ],
-optional:[]
+optional:[
+{key:"job_satisfaction",label:"Job Satisfaction",type:"number",min:1,max:10,hint:"1 = miserable, 10 = dream job"},
+{key:"work_life_balance",label:"Work-Life Balance",type:"number",min:1,max:10,hint:"1 = burnout, 10 = perfect balance"},
+{key:"recent_promotion_months",label:"Last Promotion (months)",type:"number",min:0,hint:"Months since last role/salary advancement"},
+{key:"education_level",label:"Education (years)",type:"number",min:0,max:25,hint:"Total years of formal education"},
+{key:"certifications_count",label:"Certifications",type:"number",min:0,hint:"Relevant professional certifications held"},
+{key:"remote_work_pct",label:"Remote Work (%)",type:"number",min:0,max:100,hint:"Percentage of time working remotely"},
+{key:"industry_growth_rate",label:"Industry Growth",type:"number",min:1,max:10,hint:"1 = declining, 10 = booming"}
+]
 }
 };
 const ACTION_NAMES={
